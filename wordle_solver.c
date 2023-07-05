@@ -16,7 +16,8 @@ char*read_line(FILE *file){
 			char *temp = realloc(buffer, size + 2);
 			if(!temp){
 				free(buffer);
-				return "dopici";
+                fprintf(stderr, "Allocation failed.\n");
+				return NULL;
 			}
 			buffer = temp;
 		}
@@ -25,6 +26,7 @@ char*read_line(FILE *file){
 	buffer[size] = '\0';
 	return buffer;
 }
+
 bool contains(char *haystack, char needle){
 	for(int i = 0; i < 5; i++){
 		if(haystack[i] == needle){
@@ -33,6 +35,7 @@ bool contains(char *haystack, char needle){
 	}
 	return false;
 }
+
 bool is_candidate(char green[5], char yellow[5], char black[20], char *line){
 	for (int i = 0; i < 5; i++){
 		if (green[i] != '-' && line[i] != green[i]){
@@ -41,10 +44,15 @@ bool is_candidate(char green[5], char yellow[5], char black[20], char *line){
 		if (yellow[i] != '-' && !contains(line, yellow[i])){
 			return false;
 		}
-		if (black[i] != '-' && contains(line, black[i])){
-			return false;
-		}
 	}
+    for (int i = 0; i < 26; i++){
+        if (black[i] == '-') {
+            break;
+        }
+        if (contains(line, black[i])){
+            return false;
+        }
+    }
 	return true;
 }
 
@@ -60,6 +68,9 @@ void solve(char green[5], char yellow[5], char black[20]){
 
 	while(!feof(all_words)){
 		line = read_line(all_words);
+        if (line == NULL){
+            break;
+        }
         if (!is_candidate(green, yellow, black, line)){
             free(line);
             continue;
@@ -86,28 +97,27 @@ int main(void){
 	}
 	char yellow[5];
 	inputed = 0;
-	printf("\n\nInput yellow letters or '-' to end prompt:");
-	while(inputed != 5){
-		if((c = getchar()) != '\n'){
-			yellow[inputed] = c;
-			inputed++;
-		}
-		if (c == '-'){
-			break;
-		}
-	}
+	printf("\nInput yellow letters or '-' to end prompt:");
+    while ((c = getchar()) != '-' && inputed != 5){
+        if (c != '\n'){
+            yellow[inputed] = c;
+            inputed++;
+        }
+    }
 	while (inputed != 5){
 		yellow[inputed] = '-';
 		inputed++;
 	}
-	char black[20];
+	char black[26];
 	inputed = 0;
-	printf("\n\nInput black letters or '-' to end prompt:");
-	while ((c = getchar() != '-')){
-		black[inputed] = c;
-		inputed++;
+	printf("\nInput black letters or '-' to end prompt:");
+	while ((c = getchar()) != '-'){
+        if (c != '\n'){
+            black[inputed] = c;
+            inputed++;
+        }
 	}
-	while (inputed != 20){
+	while (inputed != 26){
 		black[inputed] = '-';
 		inputed++;
 	}
